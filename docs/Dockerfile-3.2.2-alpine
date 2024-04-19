@@ -1,0 +1,31 @@
+FROM surnet/alpine-wkhtmltopdf:3.19.0-0.12.6-small as wkhtmltopdf
+FROM ruby:3.2.2-alpine
+
+# wkhtmltopdf deps
+RUN apk add --no-cache \
+    libstdc++ \
+    libx11 \
+    libxrender \
+    libxext \
+    libssl3 \
+    ca-certificates \
+    fontconfig \
+    freetype \
+    ttf-dejavu \
+    ttf-droid \
+    ttf-freefont \
+    ttf-liberation \
+    # more fonts
+  && apk add --no-cache --virtual .build-deps \
+    msttcorefonts-installer \
+  # Install microsoft fonts
+  && update-ms-fonts \
+  && fc-cache -f \
+  # Clean up when done
+  && rm -rf /tmp/* \
+  && apk del .build-deps
+
+# wkhtmltopdf binary
+COPY --from=wkhtmltopdf /bin/wkhtmltopdf /bin/wkhtmltopdf
+
+CMD ["sh"]
